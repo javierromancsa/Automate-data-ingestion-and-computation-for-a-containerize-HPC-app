@@ -34,7 +34,7 @@ namespace BatchTask
             var accountname = Environment.GetEnvironmentVariable("AccountName");
             var keyvalue = Environment.GetEnvironmentVariable("KeyValue");
 
-            // get batch client
+            // get batch client            
             BatchClient batchClient = BatchClient.Open(new BatchSharedKeyCredentials(baseurl, accountname, keyvalue));
             var poolname = Environment.GetEnvironmentVariable("PoolId");
             var jobname = Environment.GetEnvironmentVariable("JobId");
@@ -56,16 +56,18 @@ namespace BatchTask
             // submit task
             string taskid = illuminaRunName + DateTime.Now.Ticks.ToString();
             string cmd = Environment.GetEnvironmentVariable("TaskCmd");
-            string image = Environment.GetEnvironmentVariable("ImageName");
+            string image = Environment.GetEnvironmentVariable("ImageName");         
             CloudTask taskToAdd = new CloudTask(taskid, cmd);
             // if there is an image in config, let's use it
             if (!String.IsNullOrEmpty(image))
             {
                 TaskContainerSettings cmdContainerSettings = new TaskContainerSettings(
-                    imageName: image,
-                    containerRunOptions: "--rm"
+                    imageName: image,              
+                    containerRunOptions: "--rm"                    
                 );
                 taskToAdd.ContainerSettings = cmdContainerSettings;
+                taskToAdd.UserIdentity = new UserIdentity(new AutoUserSpecification(AutoUserScope.Task, ElevationLevel.NonAdmin));                
+
             }                        
             batchClient.JobOperations.AddTask(jobname, taskToAdd);
             return new OkObjectResult(taskid + " submitted");
