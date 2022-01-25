@@ -22,8 +22,13 @@ namespace BatchTask
         {
             // get body of request
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            // deserialize as json
             dynamic data = JsonConvert.DeserializeObject(requestBody);
+            // get parameters
             var illuminaRunName = data?.runName;
+            var taskCmd = data?.taskCmd;
+            var jobname = data?.jobName;
+            var poolname = data?.poolName;
             // no run name no fun
             if (null == illuminaRunName)
             {
@@ -33,19 +38,15 @@ namespace BatchTask
             var baseurl = Environment.GetEnvironmentVariable("BaseUrl");
             var accountname = Environment.GetEnvironmentVariable("AccountName");
             var keyvalue = Environment.GetEnvironmentVariable("KeyValue");
-
             // get batch client            
-            BatchClient batchClient = BatchClient.Open(new BatchSharedKeyCredentials(baseurl, accountname, keyvalue));
-            var poolname = Environment.GetEnvironmentVariable("PoolId");
-            var jobname = Environment.GetEnvironmentVariable("JobId");
+            BatchClient batchClient = BatchClient.Open(new BatchSharedKeyCredentials(baseurl, accountname, keyvalue));            
             // get pool
             var pool = batchClient.PoolOperations.GetPool(poolname);
             // get job
             CloudJob job;
             try
             {
-                job = batchClient.JobOperations.GetJob(jobname);
-                log.LogInformation(jobname + " job already exists.");
+                job = batchClient.JobOperations.GetJob(jobname);                
             }
             catch(BatchException x)
             {
@@ -55,7 +56,7 @@ namespace BatchTask
             
             // submit task
             string taskid = illuminaRunName + DateTime.Now.Ticks.ToString();
-            string cmd = Environment.GetEnvironmentVariable("TaskCmd");
+            string cmd = taskCmd + " " + illuminaRunName;
             string image = Environment.GetEnvironmentVariable("ImageName");         
             CloudTask taskToAdd = new CloudTask(taskid, cmd);
             // if there is an image in config, let's use it
