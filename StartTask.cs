@@ -25,15 +25,10 @@ namespace BatchTask
             // deserialize as json
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             // get parameters
-            var illuminaRunName = data?.runName;
-            var taskCmd = data?.taskCmd;
-            var jobname = data?.jobName;
-            var poolname = data?.poolName;
-            // no run name no fun
-            if (null == illuminaRunName)
-            {
-                return new BadRequestObjectResult("Run Name Required");
-            }
+            string arguments = data?.containerArgs;
+            string taskCmd = data?.taskCmd;
+            string jobname = data?.jobName;
+            string poolname = data?.poolName;            
             // get config variables
             var baseurl = Environment.GetEnvironmentVariable("BaseUrl");
             var accountname = Environment.GetEnvironmentVariable("AccountName");
@@ -55,8 +50,8 @@ namespace BatchTask
             }
             
             // submit task
-            string taskid = illuminaRunName + DateTime.Now.Ticks.ToString();
-            string cmd = taskCmd + " " + illuminaRunName;
+            string taskid =  jobname + "-" + DateTime.Now.Ticks.ToString();
+            string cmd = taskCmd + " " + arguments;
             string image = Environment.GetEnvironmentVariable("ImageName");         
             CloudTask taskToAdd = new CloudTask(taskid, cmd);
             // if there is an image in config, let's use it
@@ -74,4 +69,5 @@ namespace BatchTask
             return new OkObjectResult(taskid + " submitted");
         }
     }
+   
 }
