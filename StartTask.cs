@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Microsoft.Azure.Batch;
 using Microsoft.Azure.Batch.Auth;
 using Microsoft.Azure.Batch.Common;
+using System.Collections.Generic;
 
 namespace BatchTask
 {
@@ -23,35 +24,42 @@ namespace BatchTask
             // get body of request
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             // deserialize as json
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            // get parameters
-            string arguments = data?.containerArgs;
-            string taskCmd = data?.taskCmd;
-            string jobname = data?.jobName;
-            string poolname = data?.poolName;            
+            //dynamic data = JsonConvert.DeserializeObject(requestBody);
+            //// get parameters
+            //string arguments = data?.containerArgs;
+            //string taskCmd = data?.taskCmd;
+            //string jobname = data?.jobName;
+            //string poolname = data?.poolName;
+            
+            StartTaskParams startTaskParams = JsonConvert.DeserializeObject<StartTaskParams>(requestBody);
+            
+
             // get config variables
             var baseurl = Environment.GetEnvironmentVariable("BaseUrl");
             var accountname = Environment.GetEnvironmentVariable("AccountName");
             var keyvalue = Environment.GetEnvironmentVariable("KeyValue");
             // get batch client            
-            BatchClient batchClient = BatchClient.Open(new BatchSharedKeyCredentials(baseurl, accountname, keyvalue));            
+            BatchClient batchClient = BatchClient.Open(new BatchSharedKeyCredentials(baseurl, accountname, keyvalue));
             // get pool
-            var pool = batchClient.PoolOperations.GetPool(poolname);
+            //var pool = batchClient.PoolOperations.GetPool(poolname);
+            var pool = batchClient.PoolOperations.GetPool(startTaskParams.poolName);
             // get job
             CloudJob job;
             try
             {
-                job = batchClient.JobOperations.GetJob(jobname);                
+                //job = batchClient.JobOperations.GetJob(jobname);                
+                job = batchClient.JobOperations.GetJob(startTaskParams.jobName);
+
             }
             catch(BatchException x)
             {
-                job = batchClient.JobOperations.CreateJob(jobname, new PoolInformation() { PoolId = poolname });
+                job = batchClient.JobOperations.CreateJob(startTaskParams.jobName, new PoolInformation() { PoolId = startTaskParams.poolName });
                 job.Commit();
             }
             
             // submit task
-            string taskid =  jobname + "-" + DateTime.Now.Ticks.ToString();
-            string cmd = taskCmd + " " + arguments;
+            string taskid = startTaskParams.jobName + "-" + DateTime.Now.Ticks.ToString();
+            string cmd = startTaskParams.taskCmd + " " + startTaskParams.containerArgs;
             string image = Environment.GetEnvironmentVariable("ImageName");         
             CloudTask taskToAdd = new CloudTask(taskid, cmd);
             // if there is an image in config, let's use it
@@ -61,11 +69,17 @@ namespace BatchTask
                     imageName: image,              
                     containerRunOptions: "--rm"                    
                 );
+                List<OutputFile> ofiles = new List<OutputFile>();
+                foreach(var of in startTaskParams.outputFiles)
+                {
+                    ofiles.Add(of.ToAzBatchOutputFile());
+                }
                 taskToAdd.ContainerSettings = cmdContainerSettings;
-                taskToAdd.UserIdentity = new UserIdentity(new AutoUserSpecification(AutoUserScope.Task, ElevationLevel.NonAdmin));                
+                taskToAdd.OutputFiles = ofiles;
+                //taskToAdd.UserIdentity = new UserIdentity(new AutoUserSpecification(AutoUserScope.Task, ElevationLevel.NonAdmin));                
 
             }                        
-            batchClient.JobOperations.AddTask(jobname, taskToAdd);
+            batchClient.JobOperations.AddTask(startTaskParams.jobName, taskToAdd);
             return new OkObjectResult(taskid + " submitted");
         }
     }
