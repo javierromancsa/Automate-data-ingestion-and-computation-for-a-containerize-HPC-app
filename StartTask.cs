@@ -23,17 +23,8 @@ namespace BatchTask
         {
             // get body of request
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            // deserialize as json
-            //dynamic data = JsonConvert.DeserializeObject(requestBody);
-            //// get parameters
-            //string arguments = data?.containerArgs;
-            //string taskCmd = data?.taskCmd;
-            //string jobname = data?.jobName;
-            //string poolname = data?.poolName;
-            
+            // deserialize as json            
             StartTaskParams startTaskParams = JsonConvert.DeserializeObject<StartTaskParams>(requestBody);
-            
-
             // get config variables
             var baseurl = Environment.GetEnvironmentVariable("BaseUrl");
             var accountname = Environment.GetEnvironmentVariable("AccountName");
@@ -58,8 +49,8 @@ namespace BatchTask
             }
             
             // submit task
-            string taskid = startTaskParams.jobName + "-" + DateTime.Now.Ticks.ToString();
-            string cmd = startTaskParams.taskCmd + " " + startTaskParams.containerArgs;
+            string taskid = String.Format("{0}-{1}",startTaskParams.jobName, DateTime.Now.Ticks.ToString());
+            string cmd = String.Format("{0}{1}",startTaskParams.taskCmd,startTaskParams.containerArgs);
             string image = Environment.GetEnvironmentVariable("ImageName");         
             CloudTask taskToAdd = new CloudTask(taskid, cmd);
             // if there is an image in config, let's use it
@@ -72,7 +63,7 @@ namespace BatchTask
                 List<OutputFile> ofiles = new List<OutputFile>();
                 foreach(var of in startTaskParams.outputFiles)
                 {
-                    ofiles.Add(of.ToAzBatchOutputFile());
+                    ofiles.Add(of.ToAzBatchOutputFile(taskid));
                 }
                 taskToAdd.ContainerSettings = cmdContainerSettings;
                 taskToAdd.OutputFiles = ofiles;

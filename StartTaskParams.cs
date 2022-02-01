@@ -36,10 +36,11 @@ namespace BatchTask
         public string filePattern { get; set; }
         public OutputFileUploadOptionsParam uploadOptions { get; set; }
 
-        public Microsoft.Azure.Batch.OutputFile ToAzBatchOutputFile()
+        public Microsoft.Azure.Batch.OutputFile ToAzBatchOutputFile(string taskName)
         {
             ComputeNodeIdentityReference identityReference = new ComputeNodeIdentityReference() { ResourceId = this.destination.container.identityReference.resourceId };
-            OutputFileBlobContainerDestination container = new OutputFileBlobContainerDestination(this.destination.container.containerUrl, identityReference, this.destination.container.path);
+            string fullPath = String.Format("{0}/{1}", this.destination.container.path,taskName);
+            OutputFileBlobContainerDestination container = new OutputFileBlobContainerDestination(this.destination.container.containerUrl, identityReference, fullPath);
             OutputFileDestination destination = new OutputFileDestination(container);
             string cond = this.uploadOptions.uploadCondition.ToLower();
             OutputFileUploadCondition uploadCondition = cond.Equals("taskcomplation") ? OutputFileUploadCondition.TaskCompletion : (cond.Equals("taskfailure") ? OutputFileUploadCondition.TaskFailure : OutputFileUploadCondition.TaskSuccess);
