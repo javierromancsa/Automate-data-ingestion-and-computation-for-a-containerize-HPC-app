@@ -18,6 +18,7 @@ This repo implements an Azure Function that runs on a Linux plan.
 ## Configuration Required (in the Function App)
 
 | Name | Value |
+| ---- | ----- |
 | AccountName | Name of the Batch account to be used |
 | BaseUrl | Full url of the Batch account, like https://yourbatchaccount.azregion.batch.azure.com |
 | KeyValue | Batch Account Key.  To be used in order to create the job and submit the task |
