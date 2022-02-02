@@ -17,11 +17,11 @@ This repo implements an Azure Function that runs on a Linux plan.
 
 ## Configuration Required (in the Function App)
 
-| Name | Value 
-| AccountName | Name of the Batch account to be used
-| BaseUrl | Full url of the Batch account, like https://yourbatchaccount.azregion.batch.azure.com
-| KeyValue | Batch Account Key.  To be used in order to create the job and submit the tast
-| ImageName | Container Registry and image name to be used by the task.  Example: myregistry.azurecr.io/myimage:v1
+| Name | Value |
+| AccountName | Name of the Batch account to be used |
+| BaseUrl | Full url of the Batch account, like https://yourbatchaccount.azregion.batch.azure.com |
+| KeyValue | Batch Account Key.  To be used in order to create the job and submit the task |
+| ImageName | Container Registry and image name to be used by the task.  Example: myregistry.azurecr.io/myimage:v1 |
 
 ## Sample JSON Body
 
