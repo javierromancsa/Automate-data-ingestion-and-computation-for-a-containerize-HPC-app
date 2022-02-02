@@ -70,4 +70,5 @@ This repo implements an Azure Function that runs on a Linux plan.
 
 ## Links
 https://docs.microsoft.com/en-us/azure/batch/batch-docker-container-workloads
+
 https://docs.microsoft.com/en-us/azure/batch/batch-task-output-files
