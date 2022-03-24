@@ -1,4 +1,9 @@
-# BatchTask
+#Automate data ingestion and event trigger HPC compute for containerize apps or tasks
+Using ADF, Az Storage File Share, Az Blob, Az Function app, Az Batch and ACR, to Automate genomics raw sequence data for ingestion and computation.
+
+
+
+## BatchTask
 This repo implements an Azure Function that runs on a Linux plan.
 * Submits a batch job and task for existing pool.
 * Uses a container for the task.
