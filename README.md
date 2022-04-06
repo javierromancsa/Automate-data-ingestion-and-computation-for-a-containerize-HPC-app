@@ -1,7 +1,7 @@
 # Automate data ingestion and event trigger HPC compute for containerize apps or tasks
 Using ADF, Az Storage File Share, Az Blob, Az Function app, Az Batch and ACR, to Automate genomics raw sequence data for ingestion and computation.
 
-![](../images/automation_diagram.png)
+![acrchitecture](../images/automation_diagram.png)
 
 
 ## BatchTask
