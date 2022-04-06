@@ -16,10 +16,13 @@ This repo implements an Azure Function that runs on a Linux plan.
 
 ## Pre-requisites
 * Azure Subscription
+* Azure Data factory pipeline builded 
 * Existing Azure Batch Account
 * Existing Azure Container Registry with images to be used by tasks
 * Existing Azure Batch Node Pool with configured images
 * Viaual Studio 2019 or later version.  The code can also be ported to VS Code.
+
+## Building Azure Data factory pipeline and Azure Files Configuration
 
 ## Configuration Required (in the Function App)
 
